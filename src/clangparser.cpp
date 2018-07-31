@@ -43,7 +43,7 @@ ClangParser *ClangParser::s_instance = 0;
 class ClangParser::Private
 {
   public:
-    enum DetectedLang { Detected_Cpp, Detected_ObjC, Detected_ObjCpp };
+    enum DetectedLang { Detected_Cpp, Detected_ObjC, Detected_ObjCpp, Detected_C };
     Private() : tu(0), tokens(0), numTokens(0), cursors(0), 
                 ufs(0), sources(0), numFiles(0), fileMapping(257),
                 detectedLang(Detected_Cpp)
@@ -229,14 +229,13 @@ void ClangParser::start(const char *fileName,QStrList &filesInTranslationUnit)
   // we use the source file to detected the language. Detection will fail if you
   // pass a bunch of .h files containing ObjC code, and no sources :-(
   SrcLangExt lang = getLanguageFromFileName(fileName);
-  if (lang==SrcLangExt_ObjC || p->detectedLang!=ClangParser::Private::Detected_Cpp)
+  // if (lang==SrcLangExt_ObjC || p->detectedLang!=ClangParser::Private::Detected_Cpp)
   {
     QCString fn = fileName;
-    if (p->detectedLang==ClangParser::Private::Detected_Cpp && 
-        (fn.right(4).lower()==".cpp" || fn.right(4).lower()==".cxx" ||
-         fn.right(3).lower()==".cc" || fn.right(2).lower()==".c"))
+    p->detectedLang = ClangParser::Private::Detected_Cpp;
+    if ( fn.right(3).lower()==".cc" || fn.right(2).lower()==".c" || fn.right(2).lower()==".h" )
     { // fall back to C/C++ once we see an extension that indicates this
-      p->detectedLang = ClangParser::Private::Detected_Cpp;
+      p->detectedLang = ClangParser::Private::Detected_C;
     }
     else if (fn.right(3).lower()==".mm") // switch to Objective C++
     {
@@ -249,8 +248,13 @@ void ClangParser::start(const char *fileName,QStrList &filesInTranslationUnit)
   }
   switch(p->detectedLang)
   {
+    case ClangParser::Private::Detected_C:
+      argv[argc++]=qstrdup("c");
+      err("C [detect]\n");
+      break;
     case ClangParser::Private::Detected_Cpp: 
       argv[argc++]=qstrdup("c++"); 
+      err("C++ [detect]\n");
       break;
     case ClangParser::Private::Detected_ObjC: 
       argv[argc++]=qstrdup("objective-c"); 
