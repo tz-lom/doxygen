@@ -3288,6 +3288,15 @@ to be found in the default search path.
 ]]>
       </docs>
     </option>
+    <option type='bool' id='COLLABORATION_SHOW_INTERNALS' defval='1'>
+      <docs>
+<![CDATA[
+ If the \c COLLABORATION_SHOW_INTERNALS tag is set to \c YES then
+ doxygen will hide protected and private members from collaboration
+ diagramm.
+]]>
+      </docs>
+    </option>
     <option type='bool' id='GROUP_GRAPHS' defval='1' depends='HAVE_DOT'>
       <docs>
 <![CDATA[
